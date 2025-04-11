@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8">
+  <title>Разделяне на сметки</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    input, button, select {
+      margin: 5px;
+      padding: 5px;
+    }
+    table {
+      border-collapse: collapse;
+      margin-top: 10px;
+      width: 60%;
+    }
+    table, th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <h1>Разделяне на сметки</h1>
+
+  <h2>Добави сметка</h2>
+  <label for="billName">Име на сметката:</label>
+  <input type="text" id="billName" placeholder="Електричество, Отопление и т.н.">
+  <label for="billAmount">Сума (лв):</label>
+  <input type="number" id="billAmount" placeholder="Сума" step="0.01" min="0">
+  <button onclick="addBill()">Добави сметка</button>
+  
+  <h2>Списък със сметки</h2>
+  <table id="billsTable">
+    <thead>
+      <tr>
+        <th>Име на сметката</th>
+        <th>Сума (лв)</th>
+        <th>Действие</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Сметките ще бъдат показани тук -->
+    </tbody>
+  </table>
+  
+  <h2>Обща сума: <span id="totalAmount">0.00</span> лв</h2>
+  
+  <h2>Изчисли плащане</h2>
+  <label for="personSelect">Изберете лице:</label>
+  <select id="personSelect">
+    <option value="hristo">Христо</option>
+    <option value="boiko">Бойко</option>
+    <option value="martin">Мартин</option>
+    <option value="georgi">Георги</option>
+  </select>
+  <button onclick="calculatePayment()">Изчисли</button>
+  
+  <h3 id="result"></h3>
+  
+  <script>
+    let total = 0.0;
+    
+    function addBill() {
+      const nameInput = document.getElementById('billName');
+      const amountInput = document.getElementById('billAmount');
+      const billName = nameInput.value.trim();
+      const amount = parseFloat(amountInput.value);
+      
+      if (billName === "" || isNaN(amount) || amount <= 0) {
+        alert("Моля, въведете валидно име на сметката и положителна сума.");
+        return;
+      }
+      
+      // Обновяване на общата сума
+      total += amount;
+      
+      // Добавяне на сметката в таблицата
+      const tableBody = document.getElementById('billsTable').getElementsByTagName('tbody')[0];
+      const newRow = tableBody.insertRow();
+      
+      // Създаване на колони за името, сумата и бутона за действие
+      const nameCell = newRow.insertCell(0);
+      const amountCell = newRow.insertCell(1);
+      const actionCell = newRow.insertCell(2);
+      
+      nameCell.textContent = billName;
+      amountCell.textContent = amount.toFixed(2);
+      
+      // Създаване на бутон за премахване на сметката
+      const removeButton = document.createElement('button');
+      removeButton.textContent = "Премахни";
+      removeButton.onclick = function() {
+        const rowAmount = parseFloat(amountCell.textContent);
+        total -= rowAmount;
+        document.getElementById('totalAmount').textContent = total.toFixed(2);
+        tableBody.removeChild(newRow);
+      };
+      actionCell.appendChild(removeButton);
+      
+      // Актуализиране на показаната обща сума
+      document.getElementById('totalAmount').textContent = total.toFixed(2);
+      
+      // Изчистване на входните полета за следваща сметка
+      nameInput.value = "";
+      amountInput.value = "";
+    }
+    
+    function calculatePayment() {
+      const person = document.getElementById('personSelect').value;
+      let payment = 0;
+      
+      // Правила за разпределение:
+      // - Христо и Бойко плащат по една трета (total/3).
+      // - Мартин и Георги плащат по една шеста (total/6).
+      if (person === "hristo" || person === "boiko") {
+        payment = total / 3;
+      } else if (person === "martin" || person === "georgi") {
+        payment = total / 6;
+      }
+      
+      // Показване на резултата с първата буква главна
+      document.getElementById('result').textContent = 
+        person.charAt(0).toUpperCase() + person.slice(1) + " трябва да плати: " + payment.toFixed(2) + " лв";
+    }
+  </script>
+</body>
+</html>
